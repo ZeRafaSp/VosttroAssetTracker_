@@ -23,6 +23,10 @@ Um aplicativo desenvolvido em **Flutter** integrado com **Firebase** para rastre
    
 4. Execute o app
    flutter run
-Desenvolvido por: José Rafael Santos Pereira
+
+
+   
+Desenvolvido por: 
+José Rafael Santos Pereira
 
 
