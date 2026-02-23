@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "306597173605",
+    "project_id": "vosttroapp",
+    "storage_bucket": "vosttroapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:306597173605:android:e85487a3a761e1581f698c",
+        "android_client_info": {
+          "package_name": "com.example.vosttro_asset_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaCfhNVg6RVuSg7aP4W6hKsO6tgJBd4D8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
