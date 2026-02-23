@@ -6,7 +6,7 @@ import 'package:vosttro_asset_tracker/services/asset_service.dart';
 import 'package:vosttro_asset_tracker/models/client_dropdown_item.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart'; // <--- Adicione este import para FilteringTextInputFormatter
-import 'package:vosttro_asset_tracker/services/auth_service.dart'; // NOVO: Importe o AuthService
+import 'package:vosttro_asset_tracker/services/auth_service.dart'; // Importe o AuthService
 
 
 class AssetDetailScreen extends StatefulWidget {
@@ -27,9 +27,9 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
   List<ClientDropdownItem> _availableSubstituteAssets = []; // NOVO: Lista de ativos em estoque
         
 
-  TextEditingController _valorBaseController = TextEditingController(); // Novo controller
-  TextEditingController _operacaoController = TextEditingController(); // Novo controller
-  TextEditingController _observacaoDefeitoController = TextEditingController(); // NOVO CONTROLLER
+  TextEditingController _valorBaseController = TextEditingController();
+  TextEditingController _operacaoController = TextEditingController();
+  TextEditingController _observacaoDefeitoController = TextEditingController();
         
 
   bool _isLoadingClients = true;
@@ -102,7 +102,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
     // Carrega clientes e define o cliente inicial
     await _fetchClientsAndSetInitial(data['cliente_atual_id'] as String?);
     
-     // NOVO: Carrega os ativos em estoque para o dropdown de substitutos
+     //Carrega os ativos em estoque para o dropdown de substitutos
         await _fetchAvailableSubstituteAssets(); // Adicione esta chamada com await
         
 
@@ -115,7 +115,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
     setState(() {}); // Força a reconstrução para exibir valores iniciais
   }
 
-  // Novo: Carrega a operação inicial do cliente se o ativo já estiver alocado
+  //Carrega a operação inicial do cliente se o ativo já estiver alocado
   Future<void> _loadInitialOperacao(String assetSerial, String clientId) async {
     try {
       final clientDoc = await FirebaseFirestore.instance.collection('clientes').doc(clientId).get();
@@ -169,7 +169,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
       });
     }
   }
-      // NOVO: Funcao para buscar ativos em estoque para o dropdown de substitutos
+      //Funcao para buscar ativos em estoque para o dropdown de substitutos
 Future<void> _fetchAvailableSubstituteAssets() async {
         try {
           // Comeca com ativos em estoque
@@ -241,14 +241,14 @@ Future<void> _fetchAvailableSubstituteAssets() async {
         return 'N/A';
       }
 
-      // --- ALTERACAO AQUI: Vamos comparar diretamente o valor vindo do Firestore (apos trim) ---
+      //comparar diretamente o valor vindo do Firestore (apos trim) ---
       final trimmedLocationId = locationId.trim();
 
           if (trimmedLocationId == 'estoque' || trimmedLocationId == 'manutencao' || trimmedLocationId == 'desconhecido' || trimmedLocationId == 'estoque_danificado') {
             print("DEBUG _getDisplayLocationName: locationId '$trimmedLocationId' corresponde a um termo fixo. Retornando.");
             return trimmedLocationId; // Retorna o termo exatamente como ele é, apenas com trim
           }
-      // --- FIM DA ALTERACAO ---
+      
 
       print("DEBUG _getDisplayLocationName: Assumindo que $locationId é um clientId. Chamando _getClientName.");
       return await _getClientName(locationId);
@@ -339,9 +339,9 @@ Future<void> _fetchAvailableSubstituteAssets() async {
       newStatus: _selectedStatus!,
       newClient: _selectedClient,
       oldAssetData: oldAssetData,
-      newValorBase: newValorBase,           // Novo valor base
-      newTemSeguro: newTemSeguro,           // Novo status "Tem Seguro"
-      newOperacaoAllocated: newOperacaoAllocated, // Nova operação alocada
+      newValorBase: newValorBase,           
+      newTemSeguro: newTemSeguro,           
+      newOperacaoAllocated: newOperacaoAllocated,
       newObservacaoDefeito: newObservacaoDefeito,
       substituteAssetId: _selectedSubstituteAssetId,
 
@@ -399,7 +399,7 @@ Future<void> _fetchAvailableSubstituteAssets() async {
           _isDeleting = true; // Ativa o loading da exclusão
         });
 
-        // CORREÇÃO AQUI: Chamar getCurrentUserUid() do _authService
+        //Chamar getCurrentUserUid() do _authService
         String? errorMessage = await _assetService.deleteAsset(
           assetId: assetId,
           clienteAtualId: clienteAtualId,
@@ -489,7 +489,7 @@ Future<void> _fetchAvailableSubstituteAssets() async {
             _buildDetailRow('Serial:', data['serial']),
             _buildDetailRow('Tipo:', data['tipo']),
             _buildDetailRow('Modelo:', data['modelo']),
-            // NOVO: TextField para Valor Base
+            //TextField para Valor Base
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
@@ -690,9 +690,9 @@ Future<void> _fetchAvailableSubstituteAssets() async {
                         ],
                       ),
                     ),
-                  // --- FIM NOVO ---
+                  
                 ], // <--- FECHAMENTO DA LISTA DE CHILDREN DA COLUMN
-              ),// --- FIM NOVO ---
+              ),
                
              if (!(_selectedStatus == 'alugado' || _selectedStatus == 'alugado_em_manutencao'))
               _buildDetailRow('Cliente Alocado:', 'N/A'),
