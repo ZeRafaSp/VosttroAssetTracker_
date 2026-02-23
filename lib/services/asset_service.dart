@@ -8,13 +8,8 @@ class AssetService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  // NOVO MÉTODO: Método para criar um novo ativo
+  //Método para criar um novo ativo
  
-// lib/services/asset_service.dart
-
-// ... (imports e inicio da classe AssetService)
-
-// NOVO MÉTODO: Método para criar um novo ativo
 Future<String?> createAsset({
   required String assetId,
   required String tipo,
