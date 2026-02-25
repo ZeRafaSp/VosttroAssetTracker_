@@ -3,11 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart'; // Para formatação de data e números
-import 'package:vosttro_asset_tracker/screens/asset_detail_screen.dart'; // Importe a tela de detalhes do ativo
-import 'package:vosttro_asset_tracker/screens/edit_client_screen.dart'; // Importe a EditClientScreen
-import 'package:vosttro_asset_tracker/services/client_service.dart'; // <--- Importe o ClientService
-import 'package:vosttro_asset_tracker/services/auth_service.dart';   // <--- Importe o AuthService para pegar o UID do técnico
-
+import 'package:vosttro_asset_tracker/screens/asset_detail_screen.dart'; 
+import 'package:vosttro_asset_tracker/screens/edit_client_screen.dart';
+import 'package:vosttro_asset_tracker/services/client_service.dart'; 
+import 'package:vosttro_asset_tracker/services/auth_service.dart'; 
+import 'package:vosttro_asset_tracker/widgets/ui_helpers.dart';
 
 class ClientDetailScreen extends StatefulWidget {
   final DocumentSnapshot clientDocument;
@@ -99,182 +99,249 @@ class _ClientDetailScreenState extends State<ClientDetailScreen> {
     }
   }
   
-  @override
-  Widget build(BuildContext context) {
-    // Usa um StreamBuilder para ouvir as mudancas no documento do cliente em tempo real
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('clientes').doc(widget.clientDocument.id).snapshots(),
-      builder: (context, clientSnapshot) {
-        if (clientSnapshot.hasError) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Erro')),
-            body: Center(child: Text('Erro ao carregar cliente: ${clientSnapshot.error}')),
-          );
-        }
-
-        if (clientSnapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Carregando...')),
-            body: const Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (!clientSnapshot.hasData || !clientSnapshot.data!.exists) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Cliente Nao Encontrado')),
-            body: const Center(child: Text('Cliente nao encontrado.')),
-          );
-        }
-
-        // Se o cliente existe e tem dados, usa o snapshot mais recente
-        final DocumentSnapshot latestClientDocument = clientSnapshot.data!;
-        final Map<String, dynamic> clientData = latestClientDocument.data()! as Map<String, dynamic>;
-        
-        final List<Map<String, dynamic>> allocatedAssets = 
-            (clientData['ativos_alocados'] as List?)
-                ?.whereType<Map<String, dynamic>>()
-                .toList() ?? [];
-
+ @override
+Widget build(BuildContext context) {
+  return StreamBuilder<DocumentSnapshot>(
+    stream: FirebaseFirestore.instance
+        .collection('clientes')
+        .doc(widget.clientDocument.id)
+        .snapshots(),
+    builder: (context, clientSnapshot) {
+      if (clientSnapshot.hasError) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(clientData['nome_fantasia'] ?? 'Detalhes do Cliente'),
-            actions: [ // Acoes na AppBar
-              IconButton( // Botao de Editar
-                icon: const Icon(Icons.edit),
-                tooltip: 'Editar Cliente',
-                onPressed: () async {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => EditClientScreen(clientDocument: latestClientDocument),
-                    ),
-                  );
-                },
-              ),
-              // --- NOVO: Botao de Excluir Cliente ---
-              IconButton( 
-                icon: _isDeleting // Mostra um loading se estiver deletando
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Icon(Icons.delete), // Icone de lixeira
-                onPressed: _isDeleting ? null : _confirmDeleteClient, // Chama o metodo de confirmacao de exclusao
-                color: Colors.white, // Cor para o botao de excluir
-              ),
-              // ------------------------------------
-            ],
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListView(
-              children: [
-                _buildDetailRow('Nome Fantasia:', clientData['nome_fantasia']),
-                _buildDetailRow('Endereco:', clientData['endereco']),
-                _buildDetailRow('Contato:', clientData['contato']),
-                const Divider(),
-                const SizedBox(height: 10),
-
-                const Text(
-                  'Ativos Alocados',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-
-                if (allocatedAssets.isEmpty)
-                  const Text('Nenhum ativo alocado a este cliente.')
-                else
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: allocatedAssets.length,
-                    itemBuilder: (context, index) {
-                      final Map<String, dynamic> allocatedAsset = allocatedAssets[index];
-                      final String assetSerial = allocatedAsset['serial_ativo'] ?? 'N/A';
-
-                      // Formatando a data de inicio do aluguel
-                      final Timestamp? dataInicioAluguelTimestamp = allocatedAsset['data_inicio_aluguel'] as Timestamp?;
-                      final String formattedDataInicio = dataInicioAluguelTimestamp != null
-                          ? DateFormat('dd/MM/yyyy').format(_timestampToDateTime(dataInicioAluguelTimestamp)!)
-                          : 'N/A';
-                      
-                      final String operacao = allocatedAsset['operacao'] ?? 'N/A';
-
-
-                      return FutureBuilder<DocumentSnapshot?>(
-                        future: _getAssetDocument(assetSerial),
-                        builder: (context, assetSnapshot) {
-                          if (assetSnapshot.connectionState == ConnectionState.waiting) {
-                            return const ListTile(
-                              title: Text('Carregando detalhes do ativo...'),
-                            );
-                          }
-                          if (assetSnapshot.hasError) {
-                            return ListTile(
-                              title: Text('Erro ao carregar ativo ${assetSerial}: ${assetSnapshot.error}'),
-                            );
-                          }
-                          
-                          final DocumentSnapshot? fullAssetDocument = assetSnapshot.data;
-                          final Map<String, dynamic>? assetDetails = fullAssetDocument?.data() as Map<String, dynamic>?;
-
-                          if (fullAssetDocument == null || !fullAssetDocument.exists) {
-                            return ListTile(
-                              title: Text('Ativo $assetSerial nao encontrado ou removido.'),
-                              subtitle: Text('Inicio: $formattedDataInicio, Operacao: ${operacao.isEmpty ? 'N/A' : operacao}'),
-                            );
-                          }
-                          
-                          // Extrai o status atualizado do ativo
-                          final String currentAssetStatus = assetDetails?['status'] ?? 'N/A';
-                          final String statusDisplay = currentAssetStatus.replaceAll('_', ' ');
-                          
-                          // Extrai o valor base atualizado
-                          final double currentAssetValorBase = (assetDetails?['valor_base'] as num?)?.toDouble() ?? 0.0;
-                          final String formattedCurrentAssetValorBase = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(currentAssetValorBase);
-
-
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: InkWell(
-                              onTap: () async {
-                                await Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => AssetDetailScreen(assetDocument: fullAssetDocument),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Serial: ${assetDetails?['serial'] ?? assetSerial}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    Text('Tipo: ${assetDetails?['tipo'] ?? 'N/A'}'),
-                                    Text('Modelo: ${assetDetails?['modelo'] ?? 'N/A'}'),
-                                    Text('Status: $statusDisplay'),
-                                    Text('Valor Base (Ativo): $formattedCurrentAssetValorBase'),
-                                    Text('Inicio Aluguel: $formattedDataInicio'),
-                                    Text('Operacao: ${operacao.isEmpty ? 'N/A' : operacao}'),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-              ],
-            ),
+          appBar: AppBar(title: const Text('Erro')),
+          body: Center(
+            child: Text('Erro ao carregar cliente: ${clientSnapshot.error}'),
           ),
         );
       }
-    );
-  }
+
+      if (clientSnapshot.connectionState == ConnectionState.waiting) {
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      if (!clientSnapshot.hasData || !clientSnapshot.data!.exists) {
+        return const Scaffold(
+          body: Center(child: Text('Cliente não encontrado.')),
+        );
+      }
+
+      final DocumentSnapshot latestClientDocument = clientSnapshot.data!;
+      final Map<String, dynamic> clientData =
+          latestClientDocument.data()! as Map<String, dynamic>;
+
+      final List<Map<String, dynamic>> allocatedAssets =
+          (clientData['ativos_alocados'] as List?)
+                  ?.whereType<Map<String, dynamic>>()
+                  .toList() ??
+              [];
+
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(clientData['nome_fantasia'] ?? 'Cliente'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: 'Editar Cliente',
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        EditClientScreen(clientDocument: latestClientDocument),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: _isDeleting
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.delete),
+              onPressed: _isDeleting ? null : _confirmDeleteClient,
+            ),
+          ],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            // 📌 CARD DE INFORMAÇÕES DO CLIENTE
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDetailRow(
+                      'Nome Fantasia',
+                      clientData['nome_fantasia'],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildDetailRow(
+                      'Endereço',
+                      clientData['endereco'],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildDetailRow(
+                      'Contato',
+                      clientData['contato'],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 📌 TÍTULO ATIVOS
+            Text(
+              'Ativos Alocados',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+
+            if (allocatedAssets.isEmpty)
+              const Text('Nenhum ativo alocado a este cliente.')
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: allocatedAssets.length,
+                itemBuilder: (context, index) {
+                  final allocatedAsset = allocatedAssets[index];
+                  final assetSerial =
+                      allocatedAsset['serial_ativo'] ?? 'N/A';
+
+                  final Timestamp? dataInicioTimestamp =
+                      allocatedAsset['data_inicio_aluguel'];
+                  final String formattedInicio =
+                      dataInicioTimestamp != null
+                          ? DateFormat('dd/MM/yyyy').format(
+                              _timestampToDateTime(dataInicioTimestamp)!,
+                            )
+                          : 'N/A';
+
+                  final String operacao =
+                      allocatedAsset['operacao'] ?? 'N/A';
+
+                  return FutureBuilder<DocumentSnapshot?>(
+                    future: _getAssetDocument(assetSerial),
+                    builder: (context, assetSnapshot) {
+                      if (!assetSnapshot.hasData) {
+                        return const ListTile(
+                          title: Text('Carregando ativo...'),
+                        );
+                      }
+
+                      final assetDoc = assetSnapshot.data;
+                      if (assetDoc == null || !assetDoc.exists) {
+                        return ListTile(
+                          title: Text('Ativo $assetSerial não encontrado'),
+                        );
+                      }
+
+                      final assetData =
+                          assetDoc.data() as Map<String, dynamic>;
+
+                      final String status = assetData['status'] ?? 'N/A';
+                      final Color statusColor = getStatusColor(status);
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AssetDetailScreen(assetDocument: assetDoc),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      assetData['serial'] ?? assetSerial,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: statusColor.withOpacity(0.15),
+                                        borderRadius:
+                                            BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        status.replaceAll('_', ' '),
+                                        style: TextStyle(
+                                          color: statusColor,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Tipo: ${assetData['tipo'] ?? 'N/A'}',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                                Text(
+                                  'Modelo: ${assetData['modelo'] ?? 'N/A'}',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text('Início aluguel: $formattedInicio'),
+                                Text(
+                                  'Operação: ${operacao.isEmpty ? 'N/A' : operacao}',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildDetailRow(String label, Object? value) {
     return Padding(

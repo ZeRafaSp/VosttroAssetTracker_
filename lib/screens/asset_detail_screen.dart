@@ -7,6 +7,7 @@ import 'package:vosttro_asset_tracker/models/client_dropdown_item.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart'; // <--- Adicione este import para FilteringTextInputFormatter
 import 'package:vosttro_asset_tracker/services/auth_service.dart'; // NOVO: Importe o AuthService
+import 'package:vosttro_asset_tracker/widgets/ui_helpers.dart';
 
 
 class AssetDetailScreen extends StatefulWidget {
@@ -482,73 +483,119 @@ Future<void> _fetchAvailableSubstituteAssets() async {
             ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
+body: ListView(
+  padding: const EdgeInsets.all(16),
+  children: [
+
+    // 🔹 CARD PRINCIPAL
+    Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildDetailRow('Serial:', data['serial']),
             _buildDetailRow('Tipo:', data['tipo']),
             _buildDetailRow('Modelo:', data['modelo']),
-            // NOVO: TextField para Valor Base
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  const SizedBox(
-                      width: 150,
-                      child: Text('Valor Base (Aluguel):', style: TextStyle(fontWeight: FontWeight.bold))),
-                  Expanded(
-                    child: TextField(
-                      controller: _valorBaseController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*[,]?\d{0,2}')),
-                      ],
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                        prefixText: 'R\$ ',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // NOVO: Dropdown para Tem Seguro
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  const SizedBox(
-                      width: 150,
-                      child: Text('Tem Seguro:', style: TextStyle(fontWeight: FontWeight.bold))),
-                  Expanded(
-                    child: DropdownButton<bool>(
-                      isExpanded: true,
-                      value: _selectedTemSeguro,
-                      hint: const Text('Selecionar'),
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          _selectedTemSeguro = newValue;
-                        });
-                      },
-                      items: const [
-                        DropdownMenuItem(value: true, child: Text('Sim')),
-                        DropdownMenuItem(value: false, child: Text('Não')),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-                          _buildDetailRow(
-                  'Status:', 
-                  (data['status'] as String? ?? 'N/A').replaceAll('_', ' '),
-                  valueStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,), // Exemplo de estilo
-                ),
-            _buildDetailRow('Última Atualização:', formattedUltimaAtualizacao),
-            const Divider(),
 
+            const SizedBox(height: 12),
+
+            // 💰 Valor Base
+            Row(
+              children: [
+                const SizedBox(
+                  width: 150,
+                  child: Text(
+                    'Valor Base (Aluguel):',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: _valorBaseController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*[,]?\d{0,2}'),
+                      ),
+                    ],
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      prefixText: 'R\$ ',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // 🛡 Seguro
+            Row(
+              children: [
+                const SizedBox(
+                  width: 150,
+                  child: Text(
+                    'Tem Seguro:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  child: DropdownButton<bool>(
+                    isExpanded: true,
+                    value: _selectedTemSeguro,
+                    hint: const Text('Selecionar'),
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        _selectedTemSeguro = newValue;
+                      });
+                    },
+                    items: const [
+                      DropdownMenuItem(value: true, child: Text('Sim')),
+                      DropdownMenuItem(value: false, child: Text('Não')),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+
+    const SizedBox(height: 24),
+
+    // 🔹 STATUS
+    _buildDetailRow(
+      'Status:',
+      (data['status'] as String? ?? 'N/A').replaceAll('_', ' '),
+      valueStyle: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: getStatusColor(data['status'] as String? ?? 'N/A'),
+      ),
+    ),
+
+    _buildDetailRow('Última Atualização:', formattedUltimaAtualizacao),
+
+    const Divider(height: 32),
+
+    // 🔹 RESTO DA TELA (status, cliente, histórico etc.)
+ 
+ 
             // Dropdown para Status Atual (para alteração)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -741,59 +788,143 @@ Future<void> _fetchAvailableSubstituteAssets() async {
                     final String? origemId = historyData['origem'];
                     final String? destinoId = historyData['destino'];
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Tipo: $tipoMovimentacaoDisplay', style: const TextStyle(fontWeight: FontWeight.bold)),
-                            Text('Data: $formattedDate'),
-                            FutureBuilder<String>(
-                              future: _getDisplayLocationName(origemId),
-                              builder: (context, originSnapshot) {
-                                if (originSnapshot.connectionState == ConnectionState.waiting) {
-                                  return const Text('Origem: Carregando...');
-                                }
-                                return Text('Origem: ${(originSnapshot.data ?? 'N/A').replaceAll('_', ' ')}');
-                              },
-                            ),
-                            FutureBuilder<String>(
-                              future: _getDisplayLocationName(destinoId),
-                              builder: (context, destinySnapshot) {
-                                if (destinySnapshot.connectionState == ConnectionState.waiting) {
-                                  return const Text('Destino: Carregando...');
-                                }
-                                return Text('Destino: ${(destinySnapshot.data ?? 'N/A').replaceAll('_', ' ')}');
-                              },
-                            ),
-                            FutureBuilder<String>(
-                              future: _getTechnicianName(tecnicoUid),
-                              builder: (context, technicianSnapshot) {
-                                if (technicianSnapshot.connectionState == ConnectionState.waiting) {
-                                  return const Text('Técnico: Carregando...');
-                                }
-                                if (technicianSnapshot.hasError) {
-                                  return Text('Técnico: Erro (${technicianSnapshot.error})');
-                                }
-                                return Text('Técnico: ${technicianSnapshot.data ?? 'Desconhecido'}');
-                              },
-                            ),
-                            Text('Observação: ${(historyData['observacao'] as String? ?? 'N/A').replaceAll('_', ' ')}'), 
-                          ],
-                        ),
-                      ),
-                    );
+           return Card(
+  margin: const EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 8,
+  ),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: InkWell(
+    borderRadius: BorderRadius.circular(12),
+
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Tipo da movimentação
+      Text(
+        tipoMovimentacaoDisplay.toUpperCase(),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
+
+      const SizedBox(height: 6),
+
+      // Data
+      Row(
+        children: [
+          const Icon(Icons.schedule, size: 16, color: Colors.grey),
+          const SizedBox(width: 6),
+          Text(
+            formattedDate,
+            style: const TextStyle(color: Color.fromARGB(255, 94, 94, 94)),
+          ),
+        ],
+      ),
+
+      const SizedBox(height: 12),
+      const Divider(),
+      const SizedBox(height: 8),
+
+      // Origem
+      FutureBuilder<String>(
+        future: _getDisplayLocationName(origemId),
+        builder: (context, snapshot) {
+          return _buildHistoryRow(
+            icon: Icons.upload,
+            label: 'Origem',
+            value: snapshot.connectionState == ConnectionState.waiting
+                ? 'Carregando...'
+                : (snapshot.data ?? 'N/A').replaceAll('_', ' '),
+          );
+        },
+      ),
+
+      // Destino
+      FutureBuilder<String>(
+        future: _getDisplayLocationName(destinoId),
+        builder: (context, snapshot) {
+          return _buildHistoryRow(
+            icon: Icons.download,
+            label: 'Destino',
+            value: snapshot.connectionState == ConnectionState.waiting
+                ? 'Carregando...'
+                : (snapshot.data ?? 'N/A').replaceAll('_', ' '),
+          );
+        },
+      ),
+
+      // Técnico
+      FutureBuilder<String>(
+        future: _getTechnicianName(tecnicoUid),
+        builder: (context, snapshot) {
+          return _buildHistoryRow(
+            icon: Icons.person,
+            label: 'Técnico',
+            value: snapshot.connectionState == ConnectionState.waiting
+                ? 'Carregando...'
+                : (snapshot.data ?? 'Desconhecido'),
+          );
+        },
+      ),
+
+      // Observação
+      if ((historyData['observacao'] as String?)?.isNotEmpty ?? false) ...[
+        const SizedBox(height: 8),
+        _buildHistoryRow(
+          icon: Icons.notes,
+          label: 'Observação',
+          value: (historyData['observacao'] as String).replaceAll('_', ' '),
+        ),
+      ],
+    ],
+  ),
+    ),
+  ),
+);
                   },
                 );
               },
             ),
           ],
         ),
-      ),
-    );
+      );
+    
   }
+
+Widget _buildHistoryRow({
+  required IconData icon,
+  required String label,
+  required String value,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.grey),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 80,
+          child: Text(
+            '$label:',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: Text(value),
+        ),
+      ],
+    ),
+  );
+}
+
 
    Widget _buildDetailRow(String label, Object? value, {TextStyle? valueStyle}) {
     return Padding(

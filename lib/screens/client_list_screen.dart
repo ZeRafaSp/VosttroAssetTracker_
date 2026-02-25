@@ -2,8 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:vosttro_asset_tracker/screens/client_detail_screen.dart'; // Importe a tela de detalhes do cliente
+import 'package:vosttro_asset_tracker/screens/client_detail_screen.dart'; 
 import 'package:vosttro_asset_tracker/screens/add_client_screen.dart'; 
+import 'package:vosttro_asset_tracker/widgets/ui_helpers.dart';
 
 
 class ClientListScreen extends StatefulWidget {
@@ -56,106 +57,177 @@ class ClientListScreen extends StatefulWidget {
           return 'Erro ao Carregar Cliente';
         }
       }
-     @override
-  Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          title: _isSearching
-              ? TextField(
-                  controller: _searchController,
-                  decoration: const InputDecoration(
-                    hintText: 'Buscar por Nome Fantasia...',
-                    border: InputBorder.none, // Remove a borda padrao
-                    hintStyle: TextStyle(color: Colors.white70), // Estilo do placeholder
-                  ),
-                  style: const TextStyle(color: Colors.white), // Estilo do texto digitado
-                  autofocus: true, // Foca no campo de busca ao abrir
-                )
-              : const Text('Lista de Clientes'), // Titulo padrao
-          actions: [
-            IconButton( // Botao de busca (lupa) ou fechar (x)
-              icon: Icon(_isSearching ? Icons.close : Icons.search),
-              onPressed: () {
-                setState(() {
-                  _isSearching = !_isSearching; // Alterna o estado de busca
-                  if (!_isSearching) { // Se parou de buscar, limpa o campo e a query
-                    _searchController.clear();
-                    _currentSearchQuery = '';
-                  }
-                });
-              },
-            ),
-          ],
+    @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: _isSearching
+          ? TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'Buscar por Nome Fantasia...',
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: Colors.white70),
+              ),
+              style: const TextStyle(color: Colors.white),
+              autofocus: true,
+            )
+          : const Text('Lista de Clientes'),
+      actions: [
+        IconButton(
+          icon: Icon(_isSearching ? Icons.close : Icons.search),
+          onPressed: () {
+            setState(() {
+              _isSearching = !_isSearching;
+              if (!_isSearching) {
+                _searchController.clear();
+                _currentSearchQuery = '';
+              }
+            });
+          },
         ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _buildQuery().snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Erro ao carregar clientes: ${snapshot.error}'));
-          }
+      ],
+    ),
+    body: StreamBuilder<QuerySnapshot>(
+      stream: _buildQuery().snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Erro ao carregar clientes: ${snapshot.error}'),
+          );
+        }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }          
-          
-          final filteredDocs = _filterDocuments(snapshot.data!.docs);
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Nenhum cliente encontrado.'));
-          }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('Nenhum cliente encontrado.'));
+        }
 
-          return ListView.builder(
-                  itemCount: filteredDocs.length,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot document = filteredDocs[index]; // Usa os documentos filtrados
-                    Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+        final filteredDocs = _filterDocuments(snapshot.data!.docs);
 
-              // Contar quantos ativos estão alocados (se o campo existir e for uma lista)
-              final int allocatedAssetsCount = (data['ativos_alocados'] as List?)?.length ?? 0;
+        return ListView.builder(
+          itemCount: filteredDocs.length,
+          itemBuilder: (context, index) {
+            final document = filteredDocs[index];
+            final data = document.data()! as Map<String, dynamic>;
 
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                child: ListTile(
-                  title: Text(data['nome_fantasia'] ?? 'Nome Indisponível'),
-                  subtitle: Column(
+            final int allocatedAssetsCount =
+                (data['ativos_alocados'] as List?)?.length ?? 0;
+
+            return Card(
+              margin: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ClientDetailScreen(clientDocument: document),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Endereço: ${data['endereco'] ?? 'N/A'}'),
-                      Text('Contato: ${data['contato'] ?? 'N/A'}'),
-                      Text('Ativos Alocados: $allocatedAssetsCount'),
+                      // 📌 COLUNA PRINCIPAL
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              data['nome_fantasia'] ?? 'Nome Indisponível',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              data['endereco'] ?? 'Endereço não informado',
+                              style: TextStyle(
+                                color: Colors.grey.shade700,
+                                
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Contato: ${data['contato'] ?? 'N/A'}',
+                              style: TextStyle(
+                                color: Colors.grey.shade700,
+                                
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      // 📌 BADGE DE ATIVOS
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '$allocatedAssetsCount ativos',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    // Navega para a tela de detalhes do cliente, passando o DocumentSnapshot
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ClientDetailScreen(clientDocument: document),
-                      ),
-                    );
-                  },
                 ),
-              );
-            },
-          );
-        },
-        
-      ),
-         floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const AddClientScreen(),
-                ),
-              );
-            },
-            child: const Icon(Icons.add),
-            tooltip: 'Adicionar Novo Cliente',
+              ),
+            );
+          },
+        );
+      },
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const AddClientScreen(),
           ),
-
-
-    );
-  }
+        );
+      },
+      tooltip: 'Adicionar Novo Cliente',
+      child: const Icon(Icons.add),
+    ),
+  );
+}
 
              Query<Map<String, dynamic>> _buildQuery() {
         // A query base sempre sera ordenada pelo nome_fantasia para performance

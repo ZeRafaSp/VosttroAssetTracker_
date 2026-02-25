@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:vosttro_asset_tracker/screens/asset_detail_screen.dart'; 
 import 'package:vosttro_asset_tracker/screens/add_asset_screen.dart';
+import 'package:vosttro_asset_tracker/widgets/ui_helpers.dart';
 
 class AssetListScreen extends StatefulWidget {
   final String? initialStatusFilter; // NOVO PARAMETRO: filtro de status inicial
@@ -65,137 +67,233 @@ class _AssetListScreenState extends State<AssetListScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Buscar por Serial/Modelo...',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white70),
-                ),
-                style: const TextStyle(color: Colors.white),
-                autofocus: true,
-              )
-            : const Text('Lista de Ativos'),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            onPressed: () {
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: _isSearching
+          ? TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'Buscar por Serial/Modelo...',
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: Colors.white70),
+              ),
+              style: const TextStyle(color: Colors.white),
+              autofocus: true,
+            )
+          : const Text('Lista de Ativos'),
+      actions: [
+        IconButton(
+          icon: Icon(_isSearching ? Icons.close : Icons.search),
+          onPressed: () {
+            setState(() {
+              _isSearching = !_isSearching;
+              if (!_isSearching) {
+                _searchController.clear();
+                _currentSearchQuery = '';
+              }
+            });
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: DropdownButton<String>(
+            value: _selectedStatusFilter,
+            hint: const Text(
+              'Filtrar Status',
+              style: TextStyle(color: Colors.white70),
+            ),
+            icon: const Icon(Icons.filter_list, color: Colors.white),
+            underline: const SizedBox(),
+            onChanged: (String? newValue) {
               setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                  _currentSearchQuery = '';
-                }
+                _selectedStatusFilter = newValue;
               });
             },
+            items: [
+              const DropdownMenuItem<String>(
+                value: null,
+                child: Text('Todos os Status'),
+              ),
+              ...availableStatusesDisplay.keys.map((String key) {
+                return DropdownMenuItem<String>(
+                  value: key,
+                  child: Text(availableStatusesDisplay[key]!),
+                );
+              }).toList(),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: DropdownButton<String>(
-              value: _selectedStatusFilter,
-              hint: const Text('Filtrar Status', style: TextStyle(color: Colors.white70)),
-              icon: const Icon(Icons.filter_list, color: Colors.white),
-              underline: const SizedBox(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedStatusFilter = newValue;
-                });
-              },
-              items: [
-                const DropdownMenuItem<String>(
-                  value: null,
-                  child: Text('Todos os Status'),
+        ),
+      ],
+    ),
+    body: StreamBuilder<QuerySnapshot>(
+      stream: _buildQuery().snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Erro: ${snapshot.error}'));
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('Nenhum ativo encontrado.'));
+        }
+
+        final docs = snapshot.data!.docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final serial = (data['serial'] ?? '').toString().toLowerCase();
+          final modelo = (data['modelo'] ?? '').toString().toLowerCase();
+          final status = data['status'] as String?;
+
+          final matchesSearch =
+              serial.contains(_currentSearchQuery) ||
+              modelo.contains(_currentSearchQuery);
+
+          final matchesStatus =
+              _selectedStatusFilter == null || status == _selectedStatusFilter;
+
+          return matchesSearch && matchesStatus;
+        }).toList();
+
+        return ListView.builder(
+          padding: const EdgeInsets.only(bottom: 80),
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            final document = docs[index];
+            final data = document.data() as Map<String, dynamic>;
+
+            final String? clienteAtualId = data['cliente_atual_id'];
+            final String status = (data['status'] ?? 'N/A').toString();
+            final String statusDisplay =
+                status.replaceAll('_', ' ').toUpperCase();
+
+           return Card(
+  margin: const EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 8,
+  ),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: InkWell(
+    borderRadius: BorderRadius.circular(12),
+    onTap: () {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) =>
+              AssetDetailScreen(assetDocument: document),
+        ),
+      );
+    },
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 🔝 LINHA PRINCIPAL
+          Row(
+            children: [
+              const Icon(
+                Icons.inventory_2_outlined,
+                size: 26,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  data['serial'] ?? 'Serial Indisponível',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                ...availableStatusesDisplay.keys.map((String key) {
-                  return DropdownMenuItem<String>(
-                    value: key,
-                    child: Text(availableStatusesDisplay[key]!),
-                  );
-                }).toList(),
-              ],
+              ),
+              statusDot(status),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // 📄 Tipo
+          Text(
+            'Tipo: ${data['tipo'] ?? 'N/A'}',
+            style: TextStyle(
+              color: Colors.grey.shade700,
             ),
           ),
+          const SizedBox(height: 4),
+
+          // 📄 Modelo
+          Text(
+            'Modelo: ${data['modelo'] ?? 'N/A'}',
+            style: TextStyle(
+              color: Colors.grey.shade700,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // 🟢 STATUS BADGE
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 4,
+            ),
+            decoration: BoxDecoration(
+              color: getStatusColor(status).withOpacity(0.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              statusDisplay,
+              style: TextStyle(
+                fontSize: 12,
+                color: getStatusColor(status),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+
+          // 🧑 CLIENTE (quando aplicável)
+          if ((status == 'alugado' ||
+                  status == 'alugado_em_manutencao') &&
+              clienteAtualId != null) ...[
+            const SizedBox(height: 8),
+            FutureBuilder<String>(
+              future: _getClientName(clienteAtualId),
+              builder: (context, snapshot) {
+                return Text(
+                  'Cliente: ${snapshot.data ?? 'Carregando...'}',
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                  ),
+                );
+              },
+            ),
+          ],
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-            stream: _buildQuery().snapshots(), // <--- CHAMA A NOVA FUNÇÃO AQUI
-   
-
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return Center(child: Text('Erro: ${snapshot.error}'));
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return const Center(child: Text('Nenhum ativo encontrado.'));
-
-          // Lógica de filtro local (Busca e Status)
-          final docs = snapshot.data!.docs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            final serial = (data['serial'] ?? '').toString().toLowerCase();
-            final modelo = (data['modelo'] ?? '').toString().toLowerCase();
-            final status = data['status'] as String?;
-
-            final matchesSearch = serial.contains(_currentSearchQuery) || modelo.contains(_currentSearchQuery);
-            final matchesStatus = _selectedStatusFilter == null || status == _selectedStatusFilter;
-
-            return matchesSearch && matchesStatus;
-          }).toList();
-
-          return ListView.builder(
-            itemCount: docs.length,
-            itemBuilder: (context, index) {
-
-              final document = docs[index]; 
-              final data = document.data() as Map<String, dynamic>;
-
-              
-              final String? clienteAtualId = data['cliente_atual_id'];
-              final String statusDisplay = (data['status'] ?? 'N/A').toString().replaceAll('_', ' ');
-
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                child: ListTile(
-                  title: Text(data['serial'] ?? 'Serial Indisponível'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Tipo: ${data['tipo'] ?? 'N/A'}'),
-                      Text('Modelo: ${data['modelo'] ?? 'N/A'}'),
-                      Text('Status: $statusDisplay'),
-                      if ((data['status'] == 'alugado' || data['status'] == 'alugado_em_manutencao') && clienteAtualId != null)
-                        FutureBuilder<String>(
-                          future: _getClientName(clienteAtualId),
-                          builder: (context, clientSnapshot) {
-                            return Text('Cliente: ${clientSnapshot.data ?? 'Carregando...'}');
-                          },
-                        ),
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                         builder: (context) => AssetDetailScreen(assetDocument: document), 
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          );
-        },
-
-        
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddAssetScreen())),
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+    ),
+  ),
+);
+          },
+        );
+      },
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AddAssetScreen(),
+          ),
+        );
+      },
+      child: const Icon(Icons.add),
+    ),
+  );
+}
 
       // ... (final do método build(BuildContext context) { ... }, dentro de _AssetListScreenState)
 
