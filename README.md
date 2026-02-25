@@ -1,16 +1,32 @@
-# vosttro_asset_tracker
+# 📦 Vosttro Asset Tracker
 
-A new Flutter project.
+Um aplicativo desenvolvido em **Flutter** integrado com **Firebase** para rastreamento e gestão de ativos (Asset Tracking). O sistema permite gerenciar inventários de forma eficiente e com atualização em tempo real.
 
-## Getting Started
+## 🚀 Funcionalidades
+- 🔥 **Firebase Integration**: Banco de dados em tempo real e autenticação.
+- 📱 **Interface Fluida**: UI desenvolvida com os widgets modernos do Flutter.
 
-This project is a starting point for a Flutter application.
+## 🛠️ Tecnologias Utilizadas
+- [Flutter](https://flutter.dev) - Framework UI
+- [Firebase](https://firebase.google.com) - Backend e Banco de Dados
+- [Dart](https://dart.dev) - Linguagem de programação
 
-A few resources to get you started if this is your first Flutter project:
+## 📦 Como rodar o projeto
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com
+   
+2. Instale as dependências:
+   flutter pub get
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+3. Configure seu arquivo google-services.json (Android) ou GoogleService-Info.plist (iOS) do Firebase na pasta correspondente.
+   
+4. Execute o app
+   flutter run
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+   
+Desenvolvido por: 
+José Rafael Santos Pereira
+
+
