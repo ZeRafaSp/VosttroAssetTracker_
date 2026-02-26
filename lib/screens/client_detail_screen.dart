@@ -316,16 +316,43 @@ Widget build(BuildContext context) {
                                     color: Colors.grey.shade700,
                                   ),
                                 ),
+                                 const SizedBox(height: 4),
+
                                 Text(
                                   'Modelo: ${assetData['modelo'] ?? 'N/A'}',
                                   style: TextStyle(
                                     color: Colors.grey.shade700,
                                   ),
                                 ),
-                                const SizedBox(height: 6),
-                                Text('Início aluguel: $formattedInicio'),
+                                const SizedBox(height: 4),
+
+
+                                Text(
+                                  'Valor: ${assetData['valor_base'] != null 
+                           ? NumberFormat.simpleCurrency(locale: 'pt_BR').format(assetData['valor_base']) 
+                            : 'N/A'}',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                                
+
+                                const SizedBox(height: 4),
+
+                                Text(
+                                  'Início aluguel: $formattedInicio',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+
+                                  const SizedBox(height: 4),
+
                                 Text(
                                   'Operação: ${operacao.isEmpty ? 'N/A' : operacao}',
+                                     style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                  ),
                                 ),
                               ],
                             ),
