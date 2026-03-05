@@ -3,10 +3,10 @@
 Um aplicativo desenvolvido em **Flutter** integrado com **Firebase** para rastreamento e gestão de ativos (Asset Tracking). O sistema permite gerenciar inventários de forma eficiente e com atualização em tempo real.
 
 ## 🚀 Funcionalidades
-- 🔥 **Firebase Integration**: Banco de dados em tempo real e autenticação.
-- 📱 **Interface Fluida**: UI desenvolvida com os widgets modernos do Flutter.
-  📋 **Gestão de Estados:** Controle claro se o ativo está em *Estoque*, *Alugado* ou em *Manutenção*.
-  🛡️ **Segurança de Ativos:** Registro de movimentação no momento da retirada no cliente, criando um histórico confiável.
+  - 🔥 **Firebase Integration**: Banco de dados em tempo real e autenticação.
+  - 📱 **Interface Fluida**: UI desenvolvida com os widgets modernos do Flutter.
+  - 📋 **Gestão de Estados:** Controle claro se o ativo está em *Estoque*, *Alugado* ou em *Manutenção*.
+  - 🛡️ **Segurança de Ativos:** Registro de movimentação no momento da retirada no cliente, criando um histórico confiável.
 
 ## 🛠️ Tecnologias Utilizadas
 - [Flutter](https://flutter.dev) - Framework UI
