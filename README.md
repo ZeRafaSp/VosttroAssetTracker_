@@ -5,6 +5,8 @@ Um aplicativo desenvolvido em **Flutter** integrado com **Firebase** para rastre
 ## 🚀 Funcionalidades
 - 🔥 **Firebase Integration**: Banco de dados em tempo real e autenticação.
 - 📱 **Interface Fluida**: UI desenvolvida com os widgets modernos do Flutter.
+  📋 **Gestão de Estados:** Controle claro se o ativo está em *Estoque*, *Alugado* ou em *Manutenção*.
+  🛡️ **Segurança de Ativos:** Registro de movimentação no momento da retirada no cliente, criando um histórico confiável.
 
 ## 🛠️ Tecnologias Utilizadas
 - [Flutter](https://flutter.dev) - Framework UI
