@@ -1,6 +1,6 @@
 # 📦 Vosttro Asset Tracker
 
-<img src="![WhatsApp Image 2026-03-05 at 15 41 49](https://github.com/user-attachments/assets/4045a465-c6a0-4710-bd21-f696d2eb7f8d)" width="250">
+<img src="https://github.com/user-attachments/assets/4045a465-c6a0-4710-bd21-f696d2eb7f8d" width="250">
 
 
 Um aplicativo desenvolvido em **Flutter** integrado com **Firebase** para rastreamento e gestão de ativos (Asset Tracking). O sistema permite gerenciar inventários de forma eficiente e com atualização em tempo real.
