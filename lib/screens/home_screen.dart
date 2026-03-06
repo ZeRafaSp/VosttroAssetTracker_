@@ -1,13 +1,15 @@
 // lib/screens/home_screen.dart
 
         import 'package:flutter/material.dart';
-        import 'package:cloud_firestore/cloud_firestore.dart'; // <--- Adicione este import
+        import 'package:cloud_firestore/cloud_firestore.dart';
         import 'package:vosttro_asset_tracker/services/auth_service.dart';
         import 'package:vosttro_asset_tracker/screens/asset_list_screen.dart';
         import 'package:vosttro_asset_tracker/screens/client_list_screen.dart';
         import 'package:vosttro_asset_tracker/screens/add_asset_screen.dart';
-        import 'package:vosttro_asset_tracker/screens/add_client_screen.dart'; // <--- Adicione este import
-        import 'package:vosttro_asset_tracker/services/auth_service.dart'; // NOVO: Importe o AuthService
+        import 'package:vosttro_asset_tracker/screens/add_client_screen.dart';
+        import 'package:vosttro_asset_tracker/services/auth_service.dart';
+        import 'package:vosttro_asset_tracker/screens/movement_repport_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -185,7 +187,8 @@ Container(
               _buildActionButton(context, 'Clientes', const ClientListScreen(), Icons.people_outline),
               _buildActionButton(context, '+ Ativo', const AddAssetScreen(), Icons.add_box),
               _buildActionButton(context, '+ Cliente', const AddClientScreen(), Icons.person_add_alt),
-            ],
+              _buildFullWidthActionButton(context, 'Relatório', const MovementReportScreen(), Icons.assessment_rounded), 
+             ],
           ),
           const SizedBox(height: 30),
         ],
@@ -195,7 +198,7 @@ Container(
 }
 
 // CARD DO DASHBOARD
-          Widget _buildStatCard(BuildContext context, String title, int count, IconData icon, Color color, String? statusToFilter) { // NOVO: statusToFilter
+          Widget _buildStatCard(BuildContext context, String title, int count, IconData icon, Color color, String? statusToFilter) { 
             return InkWell( // Torna o card clicavel
               onTap: () {
                
@@ -275,4 +278,33 @@ Widget _buildActionButton(
     ),
   );
 }
-}
+
+// ... (final do metodo _buildActionButton)
+  }
+
+  // NOVO WIDGET AUXILIAR: Botão de largura total
+  Widget _buildFullWidthActionButton(BuildContext context, String title, Widget screen, IconData icon) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width - 40, // Largura total da tela - padding
+      child: FilledButton.tonal(
+        style: FilledButton.styleFrom(
+          backgroundColor: const Color.fromARGB(255, 228, 234, 238),
+          overlayColor: Colors.blue.withOpacity(0.15),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 30, color: Colors.grey[800]), // Mantém a cor cinza
+            const SizedBox(height: 8),
+            Text(title, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[800])), // Mantém a cor cinza
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
