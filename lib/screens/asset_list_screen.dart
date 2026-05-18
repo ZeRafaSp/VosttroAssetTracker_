@@ -298,47 +298,25 @@ Widget build(BuildContext context) {
       // ... (final do método build(BuildContext context) { ... }, dentro de _AssetListScreenState)
 
       // NOVO: Constrói a query do Firestore dinamicamente com base nos filtros
-      Query<Map<String, dynamic>> _buildQuery() {
-        Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection('ativos');
+     Query<Map<String, dynamic>> _buildQuery() {
+  Query<Map<String, dynamic>> query =
+      FirebaseFirestore.instance.collection('ativos');
 
-        // 1. Filtro por Status
-        if (_selectedStatusFilter != null && _selectedStatusFilter!.isNotEmpty) {
-          query = query.where('status', isEqualTo: _selectedStatusFilter);
-        }
+  // Mantém apenas o filtro de status no Firestore
+  if (_selectedStatusFilter != null &&
+      _selectedStatusFilter!.isNotEmpty) {
+    query = query.where(
+      'status',
+      isEqualTo: _selectedStatusFilter,
+    );
+  }
 
-        // 2. Busca por Serial/Modelo (prefix search)
-        // O Firestore só permite where('campo', '>=') e where('campo', '<=') em um único campo.
-        // Se quisermos buscar em 'serial' OU 'modelo', teríamos que fazer DUAS QUERIES separadas
-        // e mesclar os resultados no cliente, ou usar uma solução de busca externa (ex: Algolia, ElasticSearch).
-        // Por simplicidade para esta demonstracao, vamos buscar apenas por 'serial' para evitar
-        // complexidade de merges e requisitos de indices compostos complexos para campos diferentes.
-        // Se precisar de "modelo" também, considere a solução de "search_tags" no Firestore
-        // ou buscar em "serial" E "modelo" em duas consultas e depois combinar.
-        if (_currentSearchQuery.isNotEmpty) {
-          String searchLower = _currentSearchQuery.toLowerCase();
-          query = query
-              .where('serial', isGreaterThanOrEqualTo: searchLower)
-              .where('serial', isLessThanOrEqualTo: searchLower + '\uf8ff');
-              // Nota: .where('serial', isGreaterThanOrEqualTo: searchLower)
-              //       .where('serial', isLessThanOrEqualTo: searchLower + '\uf8ff')
-              //      funciona para prefix search "case-insensitive" se o campo 'serial' no Firestore
-              //      estiver armazenado em lowercase. Para o nosso caso, onde o serial pode ter
-              //      letras maiusculas, esta busca funcionara como "case-sensitive".
-              //      Para uma busca verdadeiramente case-insensitive, precisariamos de um campo 'serial_lowercase'
-              //      no Firestore ou um search index.
-        }
-        
-        // 3. Ordenação
-        // As queries que usam 'where' precisam de um 'orderBy' no mesmo campo para ter indice.
-        // Se ha filtro por status e busca por serial, a ordenacao deve ser por 'serial'.
-        // Se apenas filtrar por status, a ordenacao pode ser por status ou outro campo.
-        // Para simplificar e garantir que a query seja valida em Firestore, sempre ordenaremos por 'serial'.
-        query = query.orderBy('serial');
+  // Apenas ordenação
+  query = query.orderBy('serial');
 
-
-        return query;
-      }
-    } // <--- Fechamento da classe _AssetListScreenState
+  return query;
+}
+} // <--- Fechamento da classe _AssetListScreenState
 
     // ... (Se houver extensões ListExtension ou StringExtension logo apos a classe)
    
