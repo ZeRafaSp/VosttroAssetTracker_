@@ -43,7 +43,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
             'manutencao': 'Manutenção',
             'alugado_em_manutencao': 'Alugado e em Manutenção',
             'estoque_danificado': 'Estoque (Danificado)',
-            'substituto': 'Substituto', // Adicione o status substituto aqui
+            //'substituto': 'Substituto', // Adicione o status substituto aqui
           };
 
   final AssetService _assetService = AssetService();
@@ -81,7 +81,7 @@ class _AssetDetailScreenState extends State<AssetDetailScreen> {
           'manutencao': 'Manutenção',
           'alugado_em_manutencao': 'Alugado e em Manutenção',
           'estoque_danificado': 'Estoque (Danificado)',
-          'substituto': 'Substituto', // Adicione o status substituto aqui
+          //'substituto': 'Substituto', // Adicione o status substituto aqui
         };
 
         if (_selectedStatus != null && !availableStatusesDisplay.containsKey(_selectedStatus!)) {
@@ -442,7 +442,7 @@ Future<void> _fetchAvailableSubstituteAssets() async {
       'manutencao': 'Manutenção',
       'alugado_em_manutencao': 'Alugado e em Manutenção',
       'estoque_danificado': 'Estoque (Danificado)',
-      'substituto': 'Substituto',
+      //'substituto': 'Substituto',
     };
 
     final Timestamp? ultimaAtualizacaoTimestamp = data['ultima_atualizacao_status'] as Timestamp?;
