@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart'; 
 import 'package:vosttro_asset_tracker/models/client_dropdown_item.dart';
+import 'package:vosttro_asset_tracker/screens/pdf_report_screen.dart';
 
 
 class MovementReportScreen extends StatefulWidget {
@@ -106,7 +107,21 @@ class _MovementReportScreenState extends State<MovementReportScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Relatório de Movimentações'),
+        actions: [
+            IconButton(
+  icon: const Icon(Icons.picture_as_pdf),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const PdfReportScreen(),
       ),
+    );
+  },
+ ),
+        ],
+      ),
+
       body: _isLoadingClients
           ? const Center(child: CircularProgressIndicator())
           : StreamBuilder<QuerySnapshot>(
