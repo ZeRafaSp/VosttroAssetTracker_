@@ -38,7 +38,7 @@ Um aplicativo desenvolvido em **Flutter** integrado com **Firebase** para rastre
 <img src="https://github.com/user-attachments/assets/5fbfb921-da21-461d-b3d8-025ff58f9d1d" width="200">
 
 
-
+---
 
 👨‍💻 Autor
 José Rafael Santos Pereira
