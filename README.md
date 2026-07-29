@@ -44,7 +44,7 @@ Um aplicativo desenvolvido em **Flutter** integrado com **Firebase** para rastre
 👨‍💻 Autor
 José Rafael Santos Pereira
 
-Analista de Sistemas | Power BI | SQL | Python | Flutter | Business Intelligence
+Coordenador de T.I. | Power BI | SQL | Python | Flutter | Business Intelligence
 
 GitHub: https://github.com/ZeRafaSp/
 
