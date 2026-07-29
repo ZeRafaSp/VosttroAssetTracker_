@@ -26,6 +26,7 @@ Um aplicativo desenvolvido em **Flutter** integrado com **Firebase** para rastre
 4. Execute o app
    flutter run
 
+---
 
 ## Imagens do App
 <img src="https://github.com/user-attachments/assets/4045a465-c6a0-4710-bd21-f696d2eb7f8d" width="200">
