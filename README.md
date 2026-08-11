@@ -16,16 +16,63 @@ O sistema foi desenvolvido para reduzir controles manuais, melhorar a organizaç
 
 ---
 
-## 🚀 Funcionalidades
-  - 🔥 **Firebase Integration**: Banco de dados em tempo real e autenticação.
-  - 📱 **Interface Fluida**: UI desenvolvida com os widgets modernos do Flutter.
-  - 📋 **Gestão de Estados:** Controle claro se o ativo está em *Estoque*, *Alugado* ou em *Manutenção*.
-  - 🛡️ **Segurança de Ativos:** Registro de movimentação no momento da retirada no cliente, criando um histórico confiável.
+## 🚀 **Principais Funcionalidades**
+
+📦 **Gestão de Ativos**
+Cadastro, edição e consulta de equipamentos;
+Controle da situação atual de cada ativo;
+Identificação de ativos em Estoque, Alugado ou Manutenção;
+Consulta rápida dos equipamentos cadastrados.
+
+🔄 **Controle de Movimentações**
+Registro da retirada e movimentação dos equipamentos;
+Associação dos ativos aos respectivos clientes;
+Registro do histórico de movimentações;
+Acompanhamento da situação atual de cada equipamento.
+
+👥 **Gestão de Clientes**
+Cadastro e gerenciamento de clientes;
+Associação dos ativos aos clientes;
+Consulta dos equipamentos vinculados a cada cliente.
+
+🔐 **Autenticação e Segurança**
+Autenticação de usuários;
+Controle de acesso através das regras de segurança do Firebase;
+Proteção dos dados armazenados no banco.
+
+📊 **Informações em Tempo Real**
+Dados sincronizados com o Firebase;
+Atualização das informações sem necessidade de controles manuais;
+Centralização das informações dos ativos em um único sistema.
+
+---
 
 ## 🛠️ Tecnologias Utilizadas
 - [Flutter](https://flutter.dev) - Framework UI
 - [Firebase](https://firebase.google.com) - Backend e Banco de Dados
 - [Dart](https://dart.dev) - Linguagem de programação
+
+---
+
+## 💡 **Problema e Solução**
+**Problema**
+
+O acompanhamento dos ativos era realizado através de controles manuais em Excel, tornando o processo mais sujeito a erros e dificultando o acompanhamento das movimentações dos equipamentos.
+
+**Solução**
+
+Foi desenvolvida uma aplicação mobile para centralizar essas informações e permitir o acompanhamento dos ativos através de uma interface única.
+
+Com isso, o processo passou a contar com:
+
+Centralização das informações;
+Histórico de movimentações;
+Controle do status dos equipamentos;
+Associação entre ativos e clientes;
+Atualização das informações em tempo real;
+Redução da dependência de controles manuais.
+
+---
 
 ## 📦 Como rodar o projeto
 1. Clone o repositório:
@@ -55,15 +102,41 @@ O sistema foi desenvolvido para reduzir controles manuais, melhorar a organizaç
 
 ---
 
-👨‍💻 Autor
+## 📚 **Aprendizados**
+
+O desenvolvimento do Vosttro Asset Tracker proporcionou experiência prática em diferentes etapas de um projeto de software, desde a identificação do problema e estruturação dos dados até o desenvolvimento e implementação da solução.
+
+Entre os principais conhecimentos aplicados estão:
+
+Desenvolvimento mobile com Flutter;
+Programação em Dart;
+Banco de dados NoSQL;
+Integração com Firebase;
+Autenticação e regras de segurança;
+Modelagem e organização de dados;
+Desenvolvimento de interfaces;
+Controle de versões com Git;
+Análise de requisitos;
+Implementação de uma solução em ambiente real.
+
+--- 
+
+## 📌 **Status do Projeto**
+
+Concluído e implementado.
+
+O projeto foi desenvolvido para utilização no ambiente corporativo e posteriormente utilizado como base para outras aplicações de gerenciamento de ativos.
+
+👤 Autor
+
 José Rafael Santos Pereira
 
-Coordenador de T.I. | Power BI | SQL | Python | Flutter | Business Intelligence
+Coordenador de TI e estudante de Análise e Desenvolvimento de Sistemas, atualmente direcionando sua carreira para a área de Análise de Dados.
 
-GitHub: https://github.com/ZeRafaSp/
 
-LinkedIn: https://www.linkedin.com/in/rafaelsantospereirarsp/
+🔗 GitHub: https://github.com/ZeRafaSp
 
+🔗 LinkedIn: https://www.linkedin.com/in/rafaelsantospereirarsp/
 
 
 
