@@ -8,7 +8,7 @@ A solução foi desenvolvida individualmente e implementada na empresa, sendo ut
 
 ---
 
-##🎯 **Objetivo**
+## 🎯 **Objetivo**
 
 Centralizar o controle dos ativos tecnológicos da empresa, permitindo acompanhar desde a entrada do equipamento até sua movimentação entre estoque, clientes e manutenção.
 
