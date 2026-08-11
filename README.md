@@ -1,6 +1,20 @@
 # 📦 Vosttro Asset Tracker
 
-Um aplicativo desenvolvido em **Flutter** integrado com **Firebase** para rastreamento e gestão de ativos (Asset Tracking). O sistema permite gerenciar inventários de forma eficiente e com atualização em tempo real.
+Aplicativo mobile desenvolvido do zero em Flutter e Dart, integrado ao Firebase, para gerenciamento e rastreamento de ativos tecnológicos.
+
+O projeto foi desenvolvido para solucionar um problema real da empresa, substituindo controles manuais realizados em planilhas por uma aplicação centralizada para cadastro, movimentação e acompanhamento dos equipamentos.
+
+A solução foi desenvolvida individualmente e implementada na empresa, sendo utilizada no gerenciamento dos ativos.
+
+---
+
+🎯 Objetivo
+
+Centralizar o controle dos ativos tecnológicos da empresa, permitindo acompanhar desde a entrada do equipamento até sua movimentação entre estoque, clientes e manutenção.
+
+O sistema foi desenvolvido para reduzir controles manuais, melhorar a organização das informações e manter um histórico das movimentações realizadas.
+
+---
 
 ## 🚀 Funcionalidades
   - 🔥 **Firebase Integration**: Banco de dados em tempo real e autenticação.
