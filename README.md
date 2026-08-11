@@ -127,16 +127,18 @@ Concluído e implementado.
 
 O projeto foi desenvolvido para utilização no ambiente corporativo e posteriormente utilizado como base para outras aplicações de gerenciamento de ativos.
 
-👤 Autor
+---
+
+## 👤 **Autor**
 
 José Rafael Santos Pereira
 
-Coordenador de TI e estudante de Análise e Desenvolvimento de Sistemas, atualmente direcionando sua carreira para a área de Análise de Dados.
 
+Desenvolvendo projetos práticos | Flutter | Firebase | Power BI | SQL | Python | Business Intelligence
 
-🔗 GitHub: https://github.com/ZeRafaSp
+GitHub: https://github.com/ZeRafaSp/
 
-🔗 LinkedIn: https://www.linkedin.com/in/rafaelsantospereirarsp/
+LinkedIn: https://www.linkedin.com/in/rafaelsantospereirarsp/
 
 
 
